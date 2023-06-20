@@ -11,9 +11,29 @@ import {
   Platform 
 } from 'react-native';
 
+import { getAuth, signInAnonymously } from "firebase/auth";
+
 const Start = ({ navigation }) => {
+    const auth = getAuth();
     const [name, setName] = useState('');
     const [color, setColor] = useState('');
+
+    const signInUser = () => {
+      signInAnonymously(auth)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        // Navigate to Chat screen with user's name, color, and ID
+        navigation.navigate("Chat", {
+          name,
+          color: color || "#FFFFFF",
+          userID: user.uid,
+        });
+        Alert.alert("Signed in Successfully!");
+      })
+      .catch((error) => {
+        Alert.alert("Unable to add. Please try later");
+      });
+    };
 
     return (
       <ImageBackground
@@ -62,7 +82,7 @@ const Start = ({ navigation }) => {
           
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Chat', { name: name, color: color})}
+            onPress={signInUser}
           >
             <Text>Start Chatting</Text>
           </TouchableOpacity>
