@@ -39,7 +39,7 @@ const Start = ({ navigation }) => {
       <ImageBackground
         source={require("../assets/BackgroundImage.png")}
         resizeMode='cover'
-        style={styles.backgroundImagge}
+        style={styles.backgroundImage}
       >
       
       <View style={styles.container}>
@@ -95,7 +95,7 @@ const Start = ({ navigation }) => {
   }
   
   const styles = StyleSheet.create({
-    backgroundImagge: {
+    backgroundImage: {
       flex:1,
     },
     container: {
