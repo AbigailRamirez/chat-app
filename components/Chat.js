@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, KeyboardAvoidingView, Platform} from 'react-native';
-import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
@@ -8,37 +8,73 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const Chat = ({ db, route, navigation }) => {
+const Chat = ({ isConnected, db, route, navigation }) => {
 
     const { name, color, userID } = route.params;
     const [messages, setMessages] = useState([]);
 
+    let unsubMessages;
+
     useEffect(() => {
       navigation.setOptions({ title: name });
-      const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-      const unsubMessages = onSnapshot(q, (docs) => {
-        let newMessages = [];
-        docs.forEach(doc => {
-          newMessages.push({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: new Date(doc.data().createdAt.toMillis())
-          })
-        })
-        setMessages(newMessages);
-      })
+
+      if (isConnected === true) {
+        if (unsubMessages) unsubMessages();
+        unsubMessages = null;
+        const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+        unsubMessages = onSnapshot(q, async (docs) => {
+          let newMessages = [];
+          docs.forEach(doc => {
+            newMessages.push({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: new Date(doc.data().createdAt.toMillis())
+            });
+          });
+
+          cacheMessages(newMessages);
+          setMessages(newMessages);
+
+        });
+
+      } else loadCachedMessages();
+
       return () => {
         if (unsubMessages) unsubMessages();
       }
-     }, []);
+
+
+    }, [isConnected, ]);
+
+    const loadCachedMessages = async () => {
+      const cachedMessages = (await AsyncStorage.getItem("messages")) || [];
+      setMessages(JSON.parse(cachedMessages));
+    };
+
+    const cacheMessages = async (messagesToCache) => {
+      try {
+        await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
 
 
   // Function that adds a new message to the "messages" collection in Firestore when the user sends a message
   const onSend = (newMessages) => {
     addDoc(collection(db, "messages"), newMessages[0])
   }
+
+  const renderInputToolbar = (props) => {
+    if (isConnected) {
+      return <InputToolbar {...props} />;
+    } else {
+      return null;
+    }
+  };
 
   
   const renderBubble = (props) => {
@@ -62,6 +98,7 @@ const Chat = ({ db, route, navigation }) => {
      <GiftedChat
       messages={messages}
       renderBubble={renderBubble}
+      renderInputToolbar={renderInputToolbar}
       onSend={messages => onSend(messages)}
       user={{
         _id: userID
@@ -69,7 +106,6 @@ const Chat = ({ db, route, navigation }) => {
       name={{ name: name }}
     />
     { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
-    {Platform.OS === "ios" ? <KeyboardAvoidingView behavior="padding" /> : null}
    </View>
  );
 }
