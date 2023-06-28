@@ -14,11 +14,15 @@ import {
 import { getStorage } from "firebase/storage";
 import { useNetInfo }from '@react-native-community/netinfo';
 
+// Create the navigator
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+
+  // this defines a new state that represents the network connectivity status
   const connectionStatus = useNetInfo();
 
+  // displays an alert popup if connection is lost
   useEffect(() => {
     if (connectionStatus.isConnected === false) {
       Alert.alert("Connection Lost!");

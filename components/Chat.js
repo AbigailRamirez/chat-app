@@ -4,6 +4,7 @@ import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
+  // onSnapshot implements real time communication by acting as a listener
   onSnapshot,
   query,
   orderBy,
@@ -19,9 +20,11 @@ const Chat = ({ isConnected, db, route, navigation, storage }) => {
 
     const { name, color, userID } = route.params;
     const [messages, setMessages] = useState([]);
-
+    
+    // must declare outside of the useEffect function so that the reference to old onSnapShot () is not lost
     let unsubMessages;
-
+    
+    // if there's a connection: fetch messages from firebase, if not: load from Async storage (loadCachedMessages)
     useEffect(() => {
       navigation.setOptions({ title: name });
 
@@ -53,11 +56,13 @@ const Chat = ({ isConnected, db, route, navigation, storage }) => {
 
     }, [isConnected, ]);
 
+    // stores messages to localStorage (asyncStorage)
     const loadCachedMessages = async () => {
       const cachedMessages = (await AsyncStorage.getItem("messages")) || [];
       setMessages(JSON.parse(cachedMessages));
     };
 
+    // same logic as when using localStorage, and "try-catch" is an error handler
     const cacheMessages = async (messagesToCache) => {
       try {
         await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
@@ -126,7 +131,9 @@ const Chat = ({ isConnected, db, route, navigation, storage }) => {
     />
   }
   
-
+  // all props provided by GiftedChat library
+  // renderActions = plus/circle button to use images and location (CustomActions.js)
+  // renderCustomView = renders the map
  return (
 
    <View style={[styles.container, {backgroundColor: color}]}>
@@ -142,6 +149,7 @@ const Chat = ({ isConnected, db, route, navigation, storage }) => {
         name: name
       }}
     />
+    {/* fix for blocked view on android */}
     { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
    </View>
  );
