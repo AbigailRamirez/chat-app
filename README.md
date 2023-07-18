@@ -29,15 +29,19 @@ The objective of this project is to develop a mobile chat application using Reac
 -   Expo
 -   Firebase and Firestore
 
-### Development environment:
+# Setting up the development environment:
 
--   npm install expo-cli -g to install the Expo CLI.
--   expo login.
--   npm install.
--   install the Expo Go App on your mobile device.
--   create your test environment with Android Emulator or iOS Simulator.
--   start project with npm expo start or expo start in the terminal.
+- Clone the repository: git clone https://github.com/mpsylvan/chat-demo
 
-### Dependencies
+# EXPO 
+- Install Expo CLI as a global npm package: yarn add global expo-cli
+- Create an account and log in at https://expo.dev/.
+- Follow expo CLI's instructions.
+- Install the Expo Go app on your phone (for testing purposes)
+- Start the project: npx expo start 
+- Scan the QR code provided in your terminal
 
--   see package.json file.
+# FIREBASE/ FIRESTORE
+- follow new project workflow within Firebase console
+- include Firebase object within App.js and/or separate file. 
+- make a reference to the project using firebase config obj. 
